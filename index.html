@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diagnóstico de Maturidade IA | Xertica.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para o Mapa de Maturidade -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -81,46 +83,62 @@
             z-index: -1;
             pointer-events: none;
         }
+
+        /* Ajuste do gráfico para não estourar em mobile */
+        #radarChartContainer {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body class="min-h-screen">
     <div class="bg-grid"></div>
 
-    <!-- PÁGINA 0: LANDING PAGE -->
-    <main id="landing-page" class="py-12 px-4 flex items-center justify-center min-h-screen fade-in">
+    <!-- PÁGINA 1: QUIZ -->
+    <main id="form-page" class="py-12 px-4 fade-in">
+        <div class="max-w-2xl mx-auto">
+            <header class="text-center mb-12">
+                <img src="https://storage.googleapis.com/etp-bucket/Logos%20Xertica.ai%20%28.png%29/xertica.ai/Copy%20of%20Logo_XERTICA_white.png" alt="Xertica.ai" class="w-44 h-auto mx-auto mb-6">
+                <h2 class="text-brand-lime text-xs font-bold uppercase tracking-[0.4em] mb-4">Mapeamento de Maturidade Digital</h2>
+                <h1 class="text-2xl md:text-3xl font-bold text-white leading-tight">Diagnóstico Técnico IA</h1>
+                <p class="text-slate-400 mt-4 font-light leading-relaxed">Bem-vindo(a)! Responda às 10 perguntas a seguir para entender o nível de maturidade da sua organização em Inteligência Artificial e receber um plano de ação personalizado.</p>
+            </header>
+            <form id="maturityForm" class="space-y-10">
+                <div id="questions-container" class="space-y-12"></div>
+                <div class="text-center pt-10 pb-16">
+                    <p id="quiz-error" class="text-red-400 text-sm mb-4 hidden font-bold">Por favor, responda a todas as questões para prosseguir.</p>
+                    <button type="button" onclick="validateQuizAndNext()" class="bg-brand-solid text-slate-900 font-bold py-4 px-12 rounded-full text-lg btn-animate shadow-md">
+                        Continuar para Identificação <i class="fa-solid fa-chevron-right ml-2 text-sm"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- PÁGINA 2: IDENTIFICAÇÃO -->
+    <main id="landing-page" class="hidden-page py-12 px-4 flex items-center justify-center min-h-screen fade-in">
         <div class="max-w-xl w-full text-center">
-            <img src="https://storage.googleapis.com/etp-bucket/Logos%20Xertica.ai%20%28.png%29/xertica.ai/Copy%20of%20Logo_XERTICA_white.png" alt="Xertica.ai" class="w-44 h-auto mx-auto mb-6">
-            <h2 class="text-brand-lime text-xs font-bold uppercase tracking-[0.4em] mb-4">O Futuro do Governo é Agêntico</h2>
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">Mapeie o futuro da sua instituição</h1>
-            <p class="text-slate-400 text-lg font-light leading-relaxed mb-10">Diagnóstico técnico de maturidade digital sólido para identificar gargalos e oportunidades de automação.</p>
+            <img src="https://storage.googleapis.com/etp-bucket/Logos%20Xertica.ai%20%28.png%29/xertica.ai/Copy%20of%20Logo_XERTICA_white.png" alt="Xertica.ai" class="w-24 h-auto opacity-50 mx-auto mb-6">
+            <h2 class="text-brand-lime text-xs font-bold uppercase tracking-[0.4em] mb-4">Quase concluído</h2>
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">Identificação</h1>
+            <p class="text-slate-400 text-lg font-light leading-relaxed mb-10">Preencha os campos abaixo para gerar o laudo técnico personalizado.</p>
 
             <div class="glass-panel p-8 md:p-10 rounded-[20px] text-left">
                 <form id="leadForm" class="space-y-6" novalidate>
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div class="space-y-2">
-                            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-500 ml-1 font-bold">Nome Completo *</label>
-                            <input type="text" id="client_name" required placeholder="Seu nome" class="input-field">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-500 ml-1 font-bold">E-mail Institucional *</label>
-                            <input type="email" id="client_email" required placeholder="seu@gov.br" class="input-field">
-                        </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-[0.2em] text-slate-500 ml-1 font-bold">Nome Completo *</label>
+                        <input type="text" id="client_name" required placeholder="Seu nome" class="input-field">
                     </div>
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div class="space-y-2">
-                            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-500 ml-1 font-bold">Órgão / Secretaria *</label>
-                            <input type="text" id="client_org" required placeholder="Ex: Secretaria de Fazenda" class="input-field">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-500 ml-1 font-bold">Telefone / WhatsApp *</label>
-                            <input type="tel" id="client_phone" required placeholder="(00) 00000-0000" class="input-field">
-                        </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-[0.2em] text-slate-500 ml-1 font-bold">E-mail Institucional *</label>
+                        <input type="email" id="client_email" required placeholder="seu@gov.br" class="input-field">
                     </div>
                     
                     <div class="pt-4 text-center">
-                        <p id="lead-error" class="text-red-400 text-xs mb-4 hidden font-medium">Preencha todos os campos corretamente.</p>
+                        <p id="lead-error" class="text-red-400 text-xs mb-4 hidden font-medium">Preencha os campos corretamente.</p>
                         <button type="submit" class="w-full bg-brand-solid text-slate-900 font-bold py-5 rounded-xl text-lg btn-animate shadow-md flex items-center justify-center gap-3">
-                            Começar Diagnóstico <i class="fa-solid fa-chevron-right text-sm"></i>
+                            Ver Diagnóstico Final <i class="fa-solid fa-check text-sm"></i>
                         </button>
                     </div>
                 </form>
@@ -128,36 +146,25 @@
         </div>
     </main>
 
-    <!-- PÁGINA 1: QUIZ -->
-    <main id="form-page" class="hidden-page py-12 px-4 fade-in">
-        <div class="max-w-2xl mx-auto">
-            <header class="text-center mb-12">
-                <img src="https://storage.googleapis.com/etp-bucket/Logos%20Xertica.ai%20%28.png%29/xertica.ai/Copy%20of%20Logo_XERTICA_white.png" alt="Xertica.ai" class="w-24 h-auto opacity-50 mx-auto mb-6">
-                <h1 class="text-2xl md:text-3xl font-bold text-white leading-tight">Avaliação Técnica</h1>
-            </header>
-            <form id="maturityForm" class="space-y-10">
-                <div id="questions-container" class="space-y-8"></div>
-                <div class="text-center pt-10 pb-16">
-                    <p id="quiz-error" class="text-red-400 text-sm mb-4 hidden">Responda todos os eixos antes de continuar.</p>
-                    <button type="button" onclick="executeDiagnosis()" class="bg-brand-solid text-slate-900 font-bold py-4 px-12 rounded-full text-lg btn-animate shadow-md">
-                        Finalizar e Ver Relatório
-                    </button>
-                </div>
-            </form>
-        </div>
-    </main>
-
-    <!-- PÁGINA 2: RESULTADOS -->
+    <!-- PÁGINA 3: RESULTADOS -->
     <main id="result-page" class="hidden-page py-12 px-4 fade-in">
         <div class="max-w-4xl mx-auto">
             <div class="text-center mb-12">
                 <img src="https://storage.googleapis.com/etp-bucket/Logos%20Xertica.ai%20%28.png%29/xertica.ai/Copy%20of%20Logo_XERTICA_white.png" alt="Xertica.ai" class="w-24 opacity-60 mx-auto mb-4">
-                <h2 class="text-lg font-bold uppercase tracking-widest text-slate-400">Laudo Técnico</h2>
+                <h2 class="text-lg font-bold uppercase tracking-widest text-slate-400">Laudo Técnico de Maturidade</h2>
+            </div>
+
+            <!-- Mapa de Maturidade -->
+            <div class="glass-panel p-10 rounded-[20px] mb-8 text-center">
+                <p class="text-xs text-brand-lime font-bold uppercase tracking-[0.4em] mb-8">Mapa de Maturidade por Domínio</p>
+                <div id="radarChartContainer">
+                    <canvas id="radarChart"></canvas>
+                </div>
             </div>
 
             <!-- Score Geral -->
             <div class="glass-panel p-10 rounded-[20px] mb-8 text-center">
-                <p class="text-xs text-brand-lime font-bold uppercase tracking-[0.4em] mb-4">Maturidade Geral</p>
+                <p class="text-xs text-brand-lime font-bold uppercase tracking-[0.4em] mb-4">Nível de Prontidão Institucional</p>
                 <h3 id="result-title" class="text-4xl font-bold text-white mb-6">...</h3>
                 <div class="w-full max-w-md mx-auto bg-slate-800 h-3 rounded-full overflow-hidden mb-4 border border-slate-700">
                     <div id="result-bar" class="bg-brand-solid h-full transition-all duration-1000" style="width: 0%"></div>
@@ -165,45 +172,52 @@
                 <p class="text-lg text-slate-400 font-light">Pontuação Consolidada: <span id="result-score" class="text-white font-bold">0</span> / 50</p>
             </div>
 
-            <!-- Tópicos -->
+            <!-- Análise por Domínio -->
             <div class="glass-panel p-8 md:p-12 rounded-[20px] mb-8 text-left">
                 <h3 class="text-2xl font-bold text-white mb-10 flex items-center gap-4">
-                    <i class="fa-solid fa-microchip text-brand-cyan"></i> Análise por Domínio
+                    <i class="fa-solid fa-chart-line text-brand-cyan"></i> Eficiência por Domínio
                 </h3>
                 <div id="topic-results" class="space-y-12"></div>
             </div>
 
-            <!-- SEU DIAGNÓSTICO -->
+            <!-- Seu Diagnóstico Profundo -->
             <div class="glass-panel p-10 md:p-16 rounded-[20px] mb-8 text-left">
-                <h3 class="text-2xl font-bold text-white mb-6">Seu diagnóstico</h3>
+                <h3 class="text-2xl font-bold text-white mb-6">Seu Diagnóstico Estratégico</h3>
                 <div class="h-1.5 w-32 bg-brand-solid mb-10 rounded-full"></div>
                 <div id="deep-analysis-content" class="text-slate-300 leading-relaxed space-y-8 text-lg font-light text-justify"></div>
             </div>
 
+            <!-- Plano de Ação Imediato -->
+            <div class="glass-panel p-10 md:p-16 rounded-[20px] mb-8 text-left border-l-8 border-brand-lime">
+                <h3 class="text-2xl font-bold text-white mb-6">Plano de Ação Imediato</h3>
+                <div class="h-1.5 w-32 bg-brand-lime mb-10 rounded-full"></div>
+                <div id="action-plan-content" class="text-slate-300 leading-relaxed space-y-6 text-lg font-light"></div>
+            </div>
+
             <!-- ACELERAÇÃO XERTICA -->
             <div class="glass-panel p-10 rounded-[20px] mb-8 border-l-8 border-brand-cyan text-left">
-                <h3 class="text-2xl font-bold text-white leading-tight mb-6">A Xertica.ai acelera seus resultados</h3>
+                <h3 class="text-2xl font-bold text-white leading-tight mb-6">Como a Xertica.ai acelera seus resultados</h3>
                 <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 mb-8">
                     <p class="text-slate-300 leading-relaxed text-sm md:text-base font-light text-justify">
-                        <strong>Faking Decision Making (FDM)</strong> não é um sistema monolítico. É um framework que orquestra Agentes de IA apoiados por uma Camada Ontológica. Esta solução organiza o conhecimento institucional, apoia decisões estratégicas baseadas em evidências e garante transparência absoluta através do modelo <strong>Glass Box</strong>.
+                        A modernização tecnológica governamental exige mais do que apenas código; exige um modelo de <strong>Inteligência Institucional</strong>. O nosso framework <strong>Fair Decision Making (FDM)</strong> não substitui o humano, mas amplia sua capacidade de governação através de três pilares:
                     </p>
                 </div>
                 <div class="grid md:grid-cols-3 gap-6 mb-8">
                     <div class="p-5 rounded-xl bg-slate-800 border border-slate-700">
                         <h4 class="text-brand-lime font-bold mb-3">1. Agentes IA Especializados</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">Conjunto de agentes que atuam de forma coordenada para realizar tarefas como triagem, análise técnica, cruzamento de dados e recomendações, formando uma esteira cognitiva que automatiza processos, organiza grandes volumes de informação e acelera decisões com consistência.</p>
+                        <p class="text-xs text-slate-400 leading-relaxed italic">Coordenação de tarefas de triagem, cruzamento e recomendação em esteiras cognitivas autônomas.</p>
                     </div>
                     <div class="p-5 rounded-xl bg-slate-800 border border-slate-700">
                         <h4 class="text-brand-cyan font-bold mb-3">2. Camada Ontológica</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">Estrutura semântica que organiza o conhecimento institucional por conceitos, regras e relações, permitindo que a IA compreenda o contexto organizacional e conecte dados, políticas, indicadores e atores de forma inteligente.</p>
+                        <p class="text-xs text-slate-400 leading-relaxed italic">Conexão semântica de normas, dados e políticas para compreensão contextual da IA.</p>
                     </div>
                     <div class="p-5 rounded-xl bg-slate-800 border border-slate-700">
                         <h4 class="text-white font-bold mb-3">3. Governança Glass Box</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">Modelo de transparência que registra critérios, fontes e justificativas das decisões apoiadas por IA, garantindo rastreabilidade, facilidade de auditoria e clareza para gestores e órgãos de controle.</p>
+                        <p class="text-xs text-slate-400 leading-relaxed italic">Rastreabilidade total das justificativas e fontes, facilitando auditorias e controle.</p>
                     </div>
                 </div>
                 <div class="flex flex-col items-center gap-6 pt-6 border-t border-slate-800">
-                    <a href="https://api.whatsapp.com/send/?phone=551150396912&text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20sess%C3%A3o%20estrat%C3%A9gica%20sobre%20maturidade%20em%20IA." target="_blank" class="w-full max-w-md bg-[#25D366] text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 btn-animate shadow-md">
+                    <a href="https://api.whatsapp.com/send/?phone=551150396912&text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20sess%C3%A3o%20estrat%C3%A9gica." target="_blank" class="w-full max-w-md bg-[#25D366] text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 btn-animate shadow-md">
                         <i class="fa-brands fa-whatsapp text-xl"></i> Agende sua sessão estratégica
                     </a>
                 </div>
@@ -212,23 +226,18 @@
             <!-- Botões -->
             <div class="flex flex-col md:flex-row gap-5 justify-center items-center pb-12">
                 <button id="export-btn" onclick="openPrintWindow()" class="bg-white text-slate-900 font-bold py-4 px-12 rounded-full text-sm btn-animate shadow-md">
-                    <i class="fa-solid fa-file-pdf"></i> Exportar para PDF
+                    <i class="fa-solid fa-file-pdf"></i> Exportar PDF
                 </button>
             </div>
-            <div class="text-center text-[10px] text-slate-700 mb-10 uppercase tracking-[0.4em]">Xertica.ai | <span id="footer-org"></span></div>
+            <div class="text-center text-[10px] text-slate-700 mb-10 uppercase tracking-[0.4em]">Xertica.ai | <span id="footer-client-name"></span></div>
         </div>
     </main>
 
-    <!-- FORMULÁRIO OCULTO GOOGLE (VINCULADO AO SEU FORMULÁRIO) -->
+    <!-- FORMULÁRIO OCULTO GOOGLE -->
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none"></iframe>
     <form id="googleForm" action="https://docs.google.com/forms/u/0/d/1Qrl4Zi4wo0_Ozm4NVlUawmHcCPfOGfUiuhFzVIhFxsA/formResponse" method="POST" target="hidden_iframe" class="hidden">
-        <!-- Dados Cadastrais -->
         <input type="hidden" name="entry.435378479" id="g_name">
         <input type="hidden" name="entry.482089224" id="g_email">
-        <input type="hidden" name="entry.1800193899" id="g_org">
-        <input type="hidden" name="entry.2026739225" id="g_phone">
-        
-        <!-- Perguntas do Diagnóstico -->
         <input type="hidden" name="entry.147241097" id="g_q1">
         <input type="hidden" name="entry.4722391" id="g_q2">
         <input type="hidden" name="entry.942712749" id="g_q3">
@@ -242,39 +251,117 @@
     </form>
 
     <script>
-        const scaleOptions = [
-            { val: 1, label: "Inexistente" }, { val: 2, label: "Inicial" }, { val: 3, label: "Parcial" }, { val: 4, label: "Consistente" }, { val: 5, label: "Excelente" }
-        ];
-
         const sectionsData = [
-            { id: "eficiencia", category: "Eficiência Operacional", items: [{ id: 1, text: "Sua organização realiza atualmente a triagem e classificação de demandas públicas (manual, semiautomatizada ou automatizada)?" }, { id: 2, text: "Qual o nível de capacidade operacional para lidar com o volume de novas demandas recebidas?" }], analysis: { low: "Operação baseada em fluxos analógicos. Gargalos sistêmicos de entrada identificados.", med: "Estrutura digital parcial mas com dependência de processamento humano direto.", high: "Alta performance com classificação inteligente e automação de mérito." } },
-            { id: "governanca", category: "Governança Responsável", items: [{ id: 3, text: "A alta gestão participa da definição de diretrizes para uso seguro e ético da IA?" }, { id: 4, text: "Há governança definida para avaliação de riscos éticos associados ao uso de IA?" }], analysis: { low: "Ausência de diretrizes éticas, elevando riscos institucionais.", med: "Governança inicial, diretrizes em fase de amadurecimento.", high: "Modelo Glass Box com supervisão ética auditável pela gestão." } },
-            { id: "interoperabilidade", category: "Interoperabilidade", items: [{ id: 5, text: "Qual o nível de padronização do compartilhamento de dados entre áreas do órgão?" }, { id: 6, text: "Qual o grau de governança sobre o trânsito de dados entre setores e sistemas internos?" }], analysis: { low: "Silos de informação que geram lentidão e riscos de fraude.", med: "Integração via APIs mas carece de orquestração unificada.", high: "Ecossistema unificado com fluxo de dados transparente e seguro." } },
-            { id: "cultura", category: "Cultura e pessoas", items: [{ id: 7, text: "A organização prepara seus colaboradores para compreender e utilizar soluções de IA em suas funções diárias?" }, { id: 8, text: "Existe documentação acessível explicando fluxos e responsabilidades quando processos são assistidos por IA?" }], analysis: { low: "Equipe técnica sem clareza sobre o papel da IA no fluxo público.", med: "Treinamentos iniciados, mas falta documentação sistêmica.", high: "Colaboração humano-agente com responsabilidades documentadas." } },
-            { id: "produtividade", category: "Produtividade e Otimização", items: [{ id: 9, text: "Em que estágio está a adoção de IA para priorização automática de tarefas operacionais?" }, { id: 10, text: "Como você classifica a aplicação de IA na melhoria do fluxo de atendimento das demandas públicas?" }], analysis: { low: "Produtividade limitada à capacidade física individual.", med: "Uso experimental sem orquestração de mérito ponta a ponta.", high: "Instituição Exponencial onde a IA atua como multiplicador." } }
+            {
+                category: "Execução e Valor",
+                items: [
+                    { id: 1, text: "Como a organização lida com o volume crescente de demandas e a pressão por prazos?", 
+                      options: [
+                          { val: 1, label: "A) A triagem é manual, gerando gargalos e atrasos frequentes." },
+                          { val: 3, label: "B) Utilizamos sistemas digitais, mas ainda depende de interpretação humana." },
+                          { val: 5, label: "C) Utilizamos IA para classificar demandas por relevância e urgência." }
+                      ], analysis: { low: "Fluxos analógicos identificados. O TMA (Tempo Médio de Atendimento) é prejudicado pelo processamento manual, gerando 'esquecimento institucional'.", med: "Digitalização passiva. Há dados, mas falta inteligência para classificação automática de mérito, mantendo o gargalo humano.", high: "Entrada agêntica. A organização já utiliza IA para priorização técnica imediata, reduzindo o tempo de resposta inicial." }
+                    },
+                    { id: 2, text: "Qual a capacidade do órgão em cruzar informações de diferentes fontes para validar uma decisão?", 
+                      options: [
+                          { val: 1, label: "A) Realizamos a validação baseado apenas em dados estruturados simples." },
+                          { val: 3, label: "B) O Sistema acessa bases diferentes, mas não interpreta dados nao estruturados." },
+                          { val: 5, label: "C) Utilizamos IA para cruzar dados de diversas fontes diferentes." }
+                      ], analysis: { low: "Validação frágil. Silos de informação aumentam o risco de erro administrativo e inconsistência isonômica.", med: "Integração técnica sem inteligência semântica. O sistema acessa dados, mas não os 'entende' para validação cruzada.", high: "Visão multimodal. IA cruza fontes internas e externas para garantir decisões éticas e livres de erros técnicos." }
+                    }
+                ]
+            },
+            {
+                category: "Estratégia e Inovação",
+                items: [
+                    { id: 3, text: "Qual o papel da tecnologia na execução de tarefas complexas hoje?", 
+                      options: [
+                          { val: 1, label: "A) Ferramenta de registro; armazena o que o humano faz." },
+                          { val: 3, label: "B) Ferramenta de apoio; fornece informações para o humano decidir." },
+                          { val: 5, label: "C) Agente de resolução: IA executa fluxos completos de forma autonôma" }
+                      ], analysis: { low: "Sistemas de registro legado. A tecnologia é um custo operacional, não um multiplicador de força.", med: "Suporte à decisão. A tecnologia facilita o trabalho, mas não reduz a carga cognitiva crítica do servidor.", high: "Nível Agêntico. IA orquestra fluxos complexos e interage com sistemas, reduzindo a dívida técnica organizacional." }
+                    },
+                    { id: 4, text: "Existe um orçamento claro e dedicado para a implementação de projetos de Inteligência Artificial no órgão?", 
+                      options: [
+                          { val: 1, label: "A) O orçamento é totalmente consumido pela manutenção de sistemas antigos; inovação depende de verbas extraordinárias que raramente chegam." },
+                          { val: 3, label: "B) Existem recursos para digitalização básica, mas a IA ainda é vista como um 'custo extra' e não como um investimento estratégico em governança." },
+                          { val: 5, label: "C) Há uma verba carimbada para modernização com IA, pois entendemos que o retorno em eficiência (ROI) e a redução de erros superam o custo da implementação." }
+                      ], analysis: { low: "Subinvestimento crônico. O órgão corre risco de obsolescência funcional e incapacidade de escala frente a novas leis.", med: "Investimento tático e pontual. IA é vista como 'projeto' e não como infraestrutura estratégica de governo.", high: "Planejamento estratégico maduro. IA é tratada como ativo de governança com foco em ROI e eficiência pública." }
+                    }
+                ]
+            },
+            {
+                category: "Dados Estratégicos",
+                items: [
+                    { id: 5, text: "Quão fácil é encontrar uma resposta específica dentro de relatórios densos ou normas?", 
+                      options: [
+                          { val: 1, label: "A) Nada fácil: Leitura manual de dezenas de páginas." },
+                          { val: 3, label: "B) Fácil: Busca por palavras-chave que mostram o arquivo, mas não explicam conteúdo." },
+                          { val: 5, label: "C) Muito Fácil: IA entende perguntas simples e extrai a resposta exata na hora." }
+                      ], analysis: { low: "Gestão de conhecimento inexistente. Relatórios e normas são 'dados mortos' de difícil recuperação prática.", med: "Busca baseada em metadados. Localiza arquivos, mas o lead time de análise de conteúdo ainda é alto e humano.", high: "Acesso semântico. IA democratiza o conhecimento técnico, permitindo consultas instantâneas e assertivas." }
+                    },
+                    { id: 6, text: "Qual a clareza das informações públicas para quem não é especialista?", 
+                      options: [
+                          { val: 1, label: "A) Nada claro: Dados técnicos demais e inacessíveis." },
+                          { val: 3, label: "B) Claro: dados disponíveis, mas exigem grande esforço de interpretação." },
+                          { val: 5, label: "C) Muito Claro: IA traduz complexidade em respostas simples e claras." }
+                      ], analysis: { low: "Barreira burocrática alta. A falta de clareza gera sobrecarga em canais de atendimento físico e telefone.", med: "Transparência formal, mas sem inclusão cognitiva. Os dados estão lá, mas a interpretação é um obstáculo.", high: "Inclusão digital plena. IA atua como tradutor universal da burocracia, aumentando a satisfação do cidadão." }
+                    }
+                ]
+            },
+            {
+                category: "Cultura e Pessoas",
+                items: [
+                    { id: 7, text: "O seu sistema de atendimento ao cidadão apenas 'abre protocolos' ou resolve de ponta a ponta?", 
+                      options: [
+                          { val: 1, label: "A) Registra protocolos e depende totalmente de análise humana posterior." },
+                          { val: 3, label: "B) Encaminha para áreas responsáveis, mas sem acompanhamento automático da execução." },
+                          { val: 5, label: "C) Orquestra o fluxo ponta a ponta com automação/IA, monitorando e conduzindo até a resolução." }
+                      ], analysis: { low: "Cultura de protocolo passivo. O órgão 'ouve', mas a resolutividade é uma caixa preta ineficiente.", med: "Workflow digitalizado reativo. Há trâmite interno, mas a resolução final permanece como gargalo humano.", high: "Resolutividade agêntica. IA garante que a demanda chegue ao fim com monitoramento constante de SLA." }
+                    },
+                    { id: 8, text: "Qual a capacidade da tecnologia em 'travar' uma decisão que fira a conformidade ética?", 
+                      options: [
+                          { val: 1, label: "A) Não há uma camada de governança que bloqueie erros." },
+                          { val: 3, label: "B) Alertas simples, mas a decisão final pode ignorar as regras." },
+                          { val: 5, label: "C) Filtro que impede desfechos que não cumpram os parâmetros éticos." }
+                      ], analysis: { low: "Vulnerabilidade crítica de compliance. Alto risco jurídico, fiscal e reputacional para o gestor.", med: "Governança consultiva passiva. O sistema avisa, mas não impede o desvio ou erro orçamentário.", high: "Compliance por Design. IA atua como guarda-corpo ético e legal, impedindo decisões fora da norma." }
+                    }
+                ]
+            },
+            {
+                category: "Governança Responsável",
+                items: [
+                    { id: 9, text: "Como é feita a gestão de acessos e o controle de quem visualizou ou alterou dados?", 
+                      options: [
+                          { val: 1, label: "A) Temos logins individuais, mas difícil rastrear trilha em decisões específicas." },
+                          { val: 3, label: "B) Registro presente, mas sem alertas para comportamentos anômalos." },
+                          { val: 5, label: "C) Trilha imutável registrando cada interação IA/Humano." }
+                      ], analysis: { low: "Rastreabilidade insatisfatória. Dificuldade em responder auditorias sobre o racional das decisões.", med: "Log técnico básico. Atende TI, mas não provê contexto para auditoria de gestão ou controle externo.", high: "Auditabilidade Glass Box. Rastreabilidade total de quem, quando e POR QUE os dados foram usados." }
+                    },
+                    { id: 10, text: "Como o órgão garante que o atendimento e as decisões administrativas seguem as normas mais recentes?", 
+                      options: [
+                          { val: 1, label: "A) O servidor precisa buscar atualizações por conta própria; alto risco." },
+                          { val: 3, label: "B) Enviamos avisos e circulares por e-mail, mas não temos como garantir que a regra seja aplicada." },
+                          { val: 5, label: "C) As novas normas alimentam a inteligência do sistema, que guia o servidor em tempo real." }
+                      ], analysis: { low: "Risco jurídico latente. Decisões baseadas em leis revogadas geram nulidades e insegurança administrativa.", med: "Governança comunicativa reativa. A informação circula, mas não há garantia de conformidade na ponta.", high: "Segurança jurídica automatizada. A Camada Ontológica garante 100% de conformidade instantânea." }
+                    }
+                ]
+            }
         ];
 
         let clientData = {};
         let responses = {};
-        let resultsData = { total: 0, title: "", topics: [], deep: "" };
-
-        document.getElementById('leadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (!this.checkValidity()) { document.getElementById('lead-error').classList.remove('hidden'); return; }
-            clientData = { name: document.getElementById('client_name').value, email: document.getElementById('client_email').value, org: document.getElementById('client_org').value, phone: document.getElementById('client_phone').value };
-            document.getElementById('landing-page').classList.add('hidden-page');
-            document.getElementById('form-page').classList.remove('hidden-page');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        let resultsData = { total: 0, title: "", topics: [], deep: "", plan: "" };
+        let radarChart = null;
 
         window.onload = function() {
             const container = document.getElementById('questions-container');
             sectionsData.forEach(section => {
                 let html = `<div><h3 class="text-brand-cyan text-xs font-bold uppercase tracking-[0.4em] mb-4 border-l-4 border-brand-cyan pl-4">${section.category}</h3><div class="space-y-4">`;
                 section.items.forEach(item => {
-                    html += `<div id="q-box-${item.id}" class="glass-panel p-6 rounded-2xl"><p class="text-sm md:text-base text-slate-100 mb-6 font-normal">${item.text}</p><div class="grid grid-cols-2 md:grid-cols-5 gap-2">`;
-                    scaleOptions.forEach(opt => {
-                        html += `<div><input type="radio" name="q${item.id}" id="q${item.id}_${opt.val}" value="${opt.val}" required><label for="q${item.id}_${opt.val}" class="block w-full text-center py-3 rounded-xl border border-slate-700 cursor-pointer text-[10px] uppercase tracking-tighter transition-all"><span>${opt.val}</span><br>${opt.label}</label></div>`;
+                    html += `<div id="q-box-${item.id}" class="glass-panel p-6 rounded-2xl"><p class="text-sm md:text-base text-slate-100 mb-6 font-medium">${item.text}</p><div class="flex flex-col gap-3">`;
+                    item.options.forEach(opt => {
+                        html += `<div><input type="radio" name="q${item.id}" id="q${item.id}_${opt.val}" value="${opt.val}" required><label for="q${item.id}_${opt.val}" class="block w-full text-left p-4 rounded-xl border border-slate-700 cursor-pointer text-xs transition-all hover:bg-slate-800">${opt.label}</label></div>`;
                     });
                     html += `</div></div>`;
                 });
@@ -282,127 +369,239 @@
             });
         };
 
-        function executeDiagnosis() {
-            let total = 0; let answered = 0; let firstMiss = null;
+        function validateQuizAndNext() {
+            let answered = 0; let firstMiss = null;
             responses = {};
-
             sectionsData.forEach(sec => {
                 sec.items.forEach(item => {
                     const radios = document.getElementsByName(`q${item.id}`);
                     let sel = null; for(let r of radios) { if(r.checked) sel = r; }
                     if (sel) { 
-                        const val = parseInt(sel.value);
-                        total += val; answered++; 
-                        responses[item.id] = { val: val };
+                        responses[item.id] = { val: parseInt(sel.value) };
                         document.getElementById(`q-box-${item.id}`).classList.remove('unanswered'); 
+                        answered++;
                     } else { 
                         document.getElementById(`q-box-${item.id}`).classList.add('unanswered'); 
                         if(!firstMiss) firstMiss = document.getElementById(`q-box-${item.id}`); 
                     }
                 });
             });
+            if (answered < 10) { 
+                document.getElementById('quiz-error').classList.remove('hidden'); 
+                if(firstMiss) firstMiss.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                return; 
+            }
+            document.getElementById('form-page').classList.add('hidden-page');
+            document.getElementById('landing-page').classList.remove('hidden-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-            if (answered < 10) { document.getElementById('quiz-error').classList.remove('hidden'); if(firstMiss) firstMiss.scrollIntoView({ behavior: 'smooth' }); return; }
-            
+        document.getElementById('leadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!this.checkValidity()) { document.getElementById('lead-error').classList.remove('hidden'); return; }
+            clientData = { name: document.getElementById('client_name').value, email: document.getElementById('client_email').value };
+            finishProcess();
+        });
+
+        function finishProcess() {
+            let total = 0;
+            const topicsContainer = document.getElementById('topic-results');
+            topicsContainer.innerHTML = '';
+            resultsData.topics = [];
+
+            const chartLabels = [];
+            const chartData = [];
+
+            sectionsData.forEach(sec => {
+                let secVal = 0; 
+                sec.items.forEach(item => { 
+                    secVal += responses[item.id].val; 
+                    total += responses[item.id].val;
+                });
+                const score = secVal / 2; 
+                const pct = (score/5)*100;
+                let ana = (score <= 2) ? sec.items[0].analysis.low : (score <= 4) ? sec.items[0].analysis.med : sec.items[0].analysis.high;
+                
+                resultsData.topics.push({ cat: sec.category, score: score.toFixed(1), ana: ana });
+                chartLabels.push(sec.category);
+                chartData.push(score);
+
+                topicsContainer.innerHTML += `<div class="border-l border-slate-800 pl-6 pb-6"><div class="flex justify-between mb-2 text-white font-bold"><span>${sec.category}</span><span>${score.toFixed(1)}/5</span></div><div class="w-full bg-slate-800 h-1.5 mb-4"><div class="bg-brand-solid h-full" style="width:${pct}%"></div></div><p class="text-slate-400 text-xs italic">"${ana}"</p></div>`;
+            });
+
+            // Gerar Gráfico de Radar
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChart) radarChart.destroy();
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Maturidade Atual',
+                        data: chartData,
+                        backgroundColor: 'rgba(0, 190, 255, 0.2)',
+                        borderColor: '#00BEFF',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#C0FF7D',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#00BEFF'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#e2e8f0', font: { size: 10, family: 'Poppins' } },
+                            ticks: { display: false, stepSize: 1 },
+                            suggestedMin: 0,
+                            suggestedMax: 5
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
             resultsData.total = total;
-            if (total <= 15) { resultsData.title = "Gestão Analógica"; resultsData.deep = "Sua organização opera sob um paradigma reativo e fragmentado. A principal barreira para a modernização é a ausência de uma fundação de dados unificada. Neste estágio, cada setor funciona como uma ilha, gerando duplicidade de trabalho e uma alta margem de erro administrativo. A diretriz estratégica imediata é estabilizar a interoperabilidade antes de escalar inteligência artificial."; }
-            else if (total <= 28) { resultsData.title = "Gestão Digital"; resultsData.deep = "A instituição já realizou a transição do papel para o digital, mas os processos ainda são lineares e dependentes de intervenção humana constante. Existe uma digitalização de forma, mas não de inteligência institucional. Você possui dados, mas eles não estão trabalhando a seu favor. Sua diretriz estratégica agora deve ser a implementação de Inteligência de Fluxo para automatizar triagens críticas."; }
-            else if (total <= 42) { resultsData.title = "Gestão Estratégica IA"; resultsData.deep = "A organização demonstra uma maturidade operacional avançada. Existe padronização e os dados já transitam com segurança entre as áreas. O principal desafio identificado agora é a velocidade de resposta institucional e o mérito das decisões. A diretriz proposta é a migração para a IA Agêntica para análise de conformidade e sugestão de minutas de forma autônoma."; }
-            else { resultsData.title = "Liderança Agêntica"; resultsData.deep = "Você atingiu o topo da maturidade tecnológica governamental. Sua organização é orientada a impacto e utiliza a tecnologia como infraestrutura crítica de governação estratégica e proativa. O desafio agora não é a implementação, mas a soberania de dados e a ética preditiva de longo prazo."; }
+            if (total <= 15) { 
+                resultsData.title = "Gestão Analógica (Silo de Dados)"; 
+                resultsData.deep = `
+                    <strong>Cenário Crítico:</strong> Sua organização opera sob um paradigma de 'Ilhas de Informação'. A tecnologia é puramente instrumental para registro, resultando em um 'esquecimento institucional' onde o conhecimento reside apenas nos servidores. Isso cria uma dependência de indivíduos e um risco altíssimo de decisões baseadas em leis revogadas.<br><br>
+                    <strong>Riscos de Governança:</strong> Vulnerabilidade severa em auditorias de órgãos de controle e impossibilidade de escala operacional. O custo por transação administrativa é o mais alto do mercado.<br><br>
+                    <strong>Valor Estratégico IA:</strong> A implementação de uma Camada Ontológica pode unificar o conhecimento e reduzir o retrabalho em até 80%.
+                `;
+                resultsData.plan = `
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>1. Auditoria de Fluxos:</strong> Mapear os 3 principais silos onde o conhecimento institucional se perde entre os servidores.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>2. Saneamento de Dados:</strong> Iniciar a estruturação de documentos estáticos para que se tornem compreensíveis por máquinas (IA-Ready).</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700"><strong>3. Resgate de Governança:</strong> Definir uma política mínima de transparência e trilha auditável para evitar passivos jurídicos.</div>
+                `;
+            }
+            else if (total <= 30) { 
+                resultsData.title = "Gestão Digital (Automação Passiva)"; 
+                resultsData.deep = `
+                    <strong>Cenário Atual:</strong> A transição digital foi realizada, mas o racional decisório ainda é 100% manual. O sistema notifica, mas não 'entende'. Isso gera um falso senso de agilidade: o trâmite é rápido, mas a análise de mérito permanece como o grande gargalo operacional.<br><br>
+                    <strong>Dívida Técnica:</strong> A organização possui muitos dados, mas eles são 'mudos', não gerando insights preditivos ou apoio proativo ao servidor na ponta.<br><br>
+                    <strong>Oportunidade:</strong> Agentes IA para triagem e análise de mérito básica podem liberar 60% do tempo técnico da equipe para casos de alta complexidade.
+                `;
+                resultsData.plan = `
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>1. Piloto Agêntico:</strong> Implementar IA de triagem cognitiva para classificar e pré-analisar protocolos de entrada.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>2. Interoperabilidade Real:</strong> Ir além das APIs e garantir que os sistemas compartilhem o 'contexto' da decisão, não apenas o dado.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700"><strong>3. Monitoramento de SLA:</strong> Usar IA para monitorar tempos de execução e identificar gargalos de mérito em tempo real.</div>
+                `;
+            }
+            else if (total <= 45) { 
+                resultsData.title = "Gestão Estratégica IA (Plataforma Inteligente)"; 
+                resultsData.deep = `
+                    <strong>Cenário Atual:</strong> Maturidade avançada. A IA já apoia a decisão, mas ainda em modo 'assistido'. O maior ganho reside agora na segurança jurídica e na isonomia institucional automática.<br><br>
+                    <strong>Impacto Direto:</strong> Ao adotar Agentes Multiagentes e Camada Ontológica, você garante que 100% das decisões sigam o mesmo critério técnico, eliminando a discricionariedade que gera reclamações em ouvidorias.<br><br>
+                    <strong>Diferencial:</strong> Redução drástica da dívida técnica e segurança total através do modelo Glass Box (auditabilidade absoluta).
+                `;
+                resultsData.plan = `
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>1. Camada Ontológica:</strong> Estruturar o arcabouço legal (leis, decretos) para que a IA 'trave' decisões que firam a conformidade.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>2. Automação de Minutas:</strong> Implementar geração autônoma de documentos técnicos baseados em fatos e dados cruzados.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700"><strong>3. Refino Ético:</strong> Aplicar filtros de inteligência para monitorar desvios éticos ou orçamentários em tempo real.</div>
+                `;
+            }
+            else { 
+                resultsData.title = "Liderança Agêntica (Governo Exponencial)"; 
+                resultsData.deep = `
+                    <strong>Cenário de Excelência:</strong> Referência governamental. Sua instituição utiliza IA como infraestrutura de governação proativa. O desafio agora é a auto-otimização e a soberania de dados nacional.<br><br>
+                    <strong>Visão de Futuro:</strong> Orquestração plena fim-a-fim, onde a IA resolve demandas autonomamente sob supervisão técnica. A organização não apenas responde ao cidadão, mas prevê necessidades e aloca recursos com precisão cirúrgica.<br><br>
+                    <strong>Sustentabilidade:</strong> Foco total em transparência radical e ética preditiva para manter a confiança institucional.
+                `;
+                resultsData.plan = `
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>1. Escalabilidade Preditiva:</strong> Usar modelos de IA para prever impactos orçamentários e de demanda com 6 meses de antecedência.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 mb-3"><strong>2. Ecossistema Integrado:</strong> Liderar a interconexão com outros órgãos para decisões transversais automáticas.</div>
+                    <div class="p-4 bg-slate-800 rounded-lg border border-slate-700"><strong>3. Inovação Contínua:</strong> Testar novos Agentes para funções de alta complexidade (análises multimodais complexas).</div>
+                `;
+            }
 
             document.getElementById('result-title').innerText = resultsData.title;
             document.getElementById('result-score').innerText = total;
             document.getElementById('deep-analysis-content').innerHTML = `<p>${resultsData.deep}</p>`;
-            document.getElementById('footer-org').innerText = clientData.org;
-            
-            const topicsContainer = document.getElementById('topic-results');
-            topicsContainer.innerHTML = '';
-            resultsData.topics = [];
-            sectionsData.forEach(sec => {
-                let secVal = 0; sec.items.forEach(item => { secVal += responses[item.id].val; });
-                const score = secVal / 2; const pct = (score/5)*100;
-                let ana = (score <= 2) ? sec.analysis.low : (score <= 4) ? sec.analysis.med : sec.analysis.high;
-                resultsData.topics.push({ cat: sec.category, score: score, ana: ana });
-                topicsContainer.innerHTML += `<div class="border-l border-slate-800 pl-6 pb-6"><div class="flex justify-between mb-2 text-white font-bold"><span>${sec.category}</span><span>${score}/5</span></div><div class="w-full bg-slate-800 h-1.5 mb-4"><div class="bg-brand-solid h-full" style="width:${pct}%"></div></div><p class="text-slate-400 text-xs italic">"${ana}"</p></div>`;
-            });
+            document.getElementById('action-plan-content').innerHTML = resultsData.plan;
+            document.getElementById('footer-client-name').innerText = clientData.name;
 
-            // Sincronização com o Google Forms (IDs mapeados do seu HTML)
+            // Envio
             document.getElementById('g_name').value = clientData.name;
             document.getElementById('g_email').value = clientData.email;
-            document.getElementById('g_org').value = clientData.org;
-            document.getElementById('g_phone').value = clientData.phone;
-            
-            document.getElementById('g_q1').value = responses[1].val;
-            document.getElementById('g_q2').value = responses[2].val;
-            document.getElementById('g_q3').value = responses[3].val;
-            document.getElementById('g_q4').value = responses[4].val;
-            document.getElementById('g_q5').value = responses[5].val;
-            document.getElementById('g_q6').value = responses[6].val;
-            document.getElementById('g_q7').value = responses[7].val;
-            document.getElementById('g_q8').value = responses[8].val;
-            document.getElementById('g_q9').value = responses[9].val;
-            document.getElementById('g_q10').value = responses[10].val;
-
+            for(let i=1; i<=10; i++) { if(document.getElementById(`g_q${i}`)) document.getElementById(`g_q${i}`).value = responses[i].val; }
             document.getElementById('googleForm').submit();
 
-            // Navegação para Resultados
-            document.getElementById('form-page').classList.add('hidden-page');
+            document.getElementById('landing-page').classList.add('hidden-page');
             document.getElementById('result-page').classList.remove('hidden-page');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setTimeout(() => { document.getElementById('result-bar').style.width = (total*2) + "%"; }, 500);
         }
 
         function openPrintWindow() {
+            // Captura o gráfico como imagem para o PDF
+            const chartImage = document.getElementById('radarChart').toDataURL('image/png');
+            
             const printWindow = window.open('', '_blank', 'width=900,height=1200');
             const pdfHtml = `
-                <!DOCTYPE html>
                 <html>
                 <head>
                     <title>Laudo Técnico - Xertica.ai</title>
                     <style>
-                        body { font-family: Arial, sans-serif; background-color: #ffffff !important; color: #000000 !important; padding: 40px; line-height: 1.5; }
-                        .header { text-align: center; border-bottom: 3px solid #16a34a; padding-bottom: 20px; margin-bottom: 30px; }
-                        h1 { color: #16a34a !important; font-size: 24px; margin: 0; }
-                        h3 { color: #16a34a !important; font-size: 18px; margin-top: 30px; border-left: 5px solid #16a34a; padding-left: 10px; }
-                        .info-box { background-color: #f1f5f9; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #cbd5e1; text-align: center; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                        th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; font-size: 12px; }
-                        th { background-color: #f8fafc; font-weight: bold; }
-                        .diagnosis-text { font-size: 13px; text-align: justify; padding: 20px; background: #fdfdfd; border: 1px solid #eee; margin-top: 10px; }
-                        .fdm-box { margin-top: 40px; padding: 25px; border: 2px solid #16a34a; border-radius: 12px; background: #f8fafc; }
-                        .footer { text-align: center; font-size: 10px; color: #999; margin-top: 50px; border-top: 1px solid #eee; padding-top: 15px; }
+                        body { font-family: Arial, sans-serif; padding: 0; margin: 0; background-color: #020617; color: #e2e8f0; }
+                        .container { padding: 40px; }
+                        .header { text-align: center; border-bottom: 4px solid #00BEFF; padding-bottom: 25px; margin-bottom: 30px; }
+                        .logo { width: 180px; margin-bottom: 15px; }
+                        h1 { color: #00BEFF; font-size: 22px; margin: 0; text-transform: uppercase; }
+                        h2 { color: #00BEFF; font-size: 16px; margin-top: 30px; border-bottom: 1px solid #1e293b; padding-bottom: 8px; }
+                        .info-box { background-color: #0f172a; padding: 30px; border-radius: 15px; margin-bottom: 30px; text-align: center; border: 1px solid #1e293b; }
+                        .brand-lime { color: #C0FF7D; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: #0f172a; }
+                        th, td { padding: 12px; border: 1px solid #1e293b; text-align: left; font-size: 10px; }
+                        th { background-color: #1e293b; color: #00BEFF; font-weight: bold; }
+                        .diagnosis-box { padding: 20px; background: #0f172a; border: 1px solid #1e293b; margin-bottom: 25px; text-align: justify; border-radius: 10px; font-size: 12px; line-height: 1.6; }
+                        .chart-img { display: block; margin: 20px auto; max-width: 350px; border-radius: 15px; background: #0f172a; padding: 20px; border: 1px solid #1e293b; }
+                        .footer { margin-top: 50px; text-align: center; font-size: 10px; color: #475569; border-top: 1px solid #1e293b; padding-top: 20px; }
+                        @media print { body { -webkit-print-color-adjust: exact; } }
                     </style>
                 </head>
                 <body>
-                    <div class="header">
-                        <h1>LAUDO TÉCNICO DE MATURIDADE IA - XERTICA.AI</h1>
-                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Tecnologia para um Governo Exponencial</p>
+                    <div class="container">
+                        <div class="header">
+                            <img src="https://storage.googleapis.com/etp-bucket/Logos%20Xertica.ai%20%28.png%29/xertica.ai/Copy%20of%20Logo_XERTICA_white.png" class="logo">
+                            <h1>Laudo Técnico de Maturidade IA</h1>
+                        </div>
+                        
+                        <div class="info-box">
+                            <div style="font-size: 10px; text-transform: uppercase; color: #C0FF7D; letter-spacing: 2px;">Nível de Prontidão IA</div>
+                            <div style="font-size: 28px; color: #00BEFF; font-weight: bold; margin: 10px 0;">${resultsData.title}</div>
+                            <div style="font-size: 14px;">Pontuação Consolidada: <strong>${resultsData.total} / 50</strong></div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <p style="font-size: 10px; text-transform: uppercase; color: #C0FF7D;">Mapa de Maturidade</p>
+                            <img src="${chartImage}" class="chart-img">
+                        </div>
+
+                        <h2>1. Maturidade por Domínio</h2>
+                        <table>
+                            <thead><tr><th>Eixo Estratégico</th><th style="text-align:center">Score</th><th>Análise Técnica</th></tr></thead>
+                            <tbody>${resultsData.topics.map(t => `<tr><td><strong>${t.cat}</strong></td><td style="text-align:center; color:#C0FF7D"><strong>${t.score}/5</strong></td><td>${t.ana}</td></tr>`).join('')}</tbody>
+                        </table>
+
+                        <div style="page-break-before: always;"></div>
+
+                        <h2>2. Seu Diagnóstico Estratégico</h2>
+                        <div class="diagnosis-box">${resultsData.deep}</div>
+
+                        <h2>3. Plano de Ação Imediato</h2>
+                        <div class="diagnosis-box" style="border-left: 6px solid #C0FF7D;">${resultsData.plan}</div>
+
+                        <h2>4. Aceleração Xertica.ai (Framework FDM)</h2>
+                        <div class="diagnosis-box">
+                            <p>O framework <strong style="color:#00BEFF">Fair Decision Making (FDM)</strong> orquestra Agentes de IA e Camadas Ontológicas para transformar o conhecimento institucional em decisões rápidas, seguras e auditáveis.</p>
+                        </div>
+
+                        <div class="footer">Xertica.ai © 2026 | Especialista: ${clientData.name}</div>
                     </div>
-                    <div style="font-size: 11px; margin-bottom: 20px;">
-                        <strong>Organização:</strong> ${clientData.org} | <strong>Gestor:</strong> ${clientData.name} | <strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}
-                    </div>
-                    <div class="info-box">
-                        <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; color: #64748b;">Maturidade Geral</span>
-                        <h2 style="font-size: 32px; margin: 10px 0; color: #16a34a !important;">${resultsData.title}</h2>
-                        <p style="font-size: 18px;">Pontuação Consolidada: <strong>${resultsData.total} / 50 pontos</strong></p>
-                    </div>
-                    <h3>1. Análise por Eixo Temático</h3>
-                    <table>
-                        <thead><tr><th style="width: 30%;">Eixo Analisado</th><th style="width: 15%; text-align: center;">Nota</th><th style="width: 55%;">Parecer Técnico</th></tr></thead>
-                        <tbody>
-                            ${resultsData.topics.map(t => `<tr><td><strong>${t.cat}</strong></td><td style="text-align: center; font-weight: bold; color: #16a34a;">${t.score}/5</td><td style="font-style: italic; color: #555;">${t.ana}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                    <div style="page-break-before: always; padding-top: 20px;">
-                        <h3>2. Seu diagnóstico</h3>
-                        <div class="diagnosis-text">${resultsData.deep}</div>
-                    </div>
-                    <div class="fdm-box">
-                        <h2 style="color: #16a34a; font-size: 20px; margin-top: 0;">3. A Xertica.ai acelera seus resultados</h2>
-                        <p style="font-size: 13px; color: #222;"><strong>Faking Decision Making (FDM)</strong> não é um sistema monolítico. É um framework que orquestra Agentes de IA apoiados por uma Camada Ontológica. Esta solução organiza o conhecimento institucional, apoia decisões estratégicas baseadas em evidências e garante transparência absoluta através do modelo Glass Box.</p>
-                    </div>
-                    <div class="footer">Documento oficial gerado por Xertica.ai © 2026.</div>
-                    <script>window.onload = function() { setTimeout(() => { window.print(); }, 500); }<\/script>
+                    <script>window.onload = function() { setTimeout(() => { window.print(); }, 800); }<\/script>
                 </body>
                 </html>
             `;
